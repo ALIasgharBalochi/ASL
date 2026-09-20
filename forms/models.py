@@ -1,11 +1,10 @@
 from django.db import models
 import uuid
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 # Create your models here.
-class CustomUser(AbstractUser):
-    email = models.EmailField(unique=True)
 
 
 class Category(models.Model):
@@ -14,9 +13,7 @@ class Category(models.Model):
 
 
 class Process(models.Model):
-    user = models.ForeignKey(
-        CustomUser, on_delete=models.CASCADE, related_name="process"
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="process")
     visibility_choise = [("public", "Public"), ("private", "Private")]
     process_type = [("liner", "Liner"), ("free", "Free")]
 
@@ -67,7 +64,7 @@ class Submission(models.Model):
         related_name="submissions",
     )
     user = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
