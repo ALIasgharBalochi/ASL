@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password, check_password
 
 User = get_user_model()
 
@@ -20,10 +21,24 @@ class Process(models.Model):
     visibility = models.CharField(choices=visibility_choise)
     type = models.CharField(choices=process_type)
 
+    password = models.CharField(max_length=128, blank=True, null=True)
+        
     category = models.ForeignKey(
         Category, on_delete=models.CASCADE, related_name="process"
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    def set_password(self, raw_password):
+        if raw_password:
+            self.password = make_password(raw_password)
+        else:
+            self.password = None
+
+    def check_password(self, raw_password):
+        if not self.password:
+            return False
+        
+        return check_password(raw_password, self.password)
 
 
 class Form(models.Model):
@@ -33,11 +48,25 @@ class Form(models.Model):
     visibility = models.CharField(choices=visibility_choise)
     proces = models.ForeignKey(Process, on_delete=models.CASCADE, related_name="forms")
 
+    password = models.CharField(max_length=128, blank=True, null=True)
+    
     category = models.ForeignKey(
         Category, on_delete=models.CASCADE, related_name="forms"
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    def set_password(self, raw_password):
+        if raw_password:
+            self.password = make_password(raw_password)
+        else:
+            self.password = None
+
+    def check_password(self, raw_password):
+        if not self.password:
+            return False
+
+        return check_password(raw_password, self.password)
 
 
 class Question(models.Model):
