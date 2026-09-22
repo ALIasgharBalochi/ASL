@@ -38,6 +38,9 @@ INSTALLED_APPS = [
     "apps.forms",
     "apps.accounts",
     "apps.reports",
+    "rest_framework",
+    'rest_framework_simplejwt',
+
 ]
 
 MIDDLEWARE = [
@@ -118,4 +121,10 @@ MAILERS = {
     "default": {
         "BACKEND": "django.core.mail.backends.console.EmailBackend",
     },
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
 }
