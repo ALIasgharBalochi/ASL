@@ -2,8 +2,7 @@ name: Delete merged branches
 
 on:
   pull_request:
-    types:
-      - closed
+    types: [closed]
 
 jobs:
   delete-branch:
@@ -20,5 +19,12 @@ jobs:
 
     steps:
       - name: Delete merged branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
         run: |
-          git push origin --delete "${{ github.event.pull_request.head.ref }}"
+          echo "Deleting branch: $BRANCH_NAME"
+
+          gh api \
+            --method DELETE \
+            "/repos/${{ github.repository }}/git/refs/heads/$BRANCH_NAME"
