@@ -1,8 +1,15 @@
 services:
   web:
     image: web
+    command: python manage.py runserver 0.0.0.0:8000
     build:
       context: .
       dockerfile: ./Dockerfile
     ports:
       - 8000:8000
+    depends_on:
+      - redis
+  redis:
+    image: redis:7-alpine
+    container_name: asl_redis
+    restart: unless-stopped
