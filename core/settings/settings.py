@@ -40,8 +40,16 @@ INSTALLED_APPS = [
     "apps.reports",
     "rest_framework",
     'rest_framework_simplejwt',
+    # for google
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -51,6 +59,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    #for google
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -128,3 +138,19 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+    }
+}
+
+# after login it will redirect us to google jwt
+LOGIN_REDIRECT_URL = "/accounts/api/google/jwt/"
+
