@@ -46,7 +46,7 @@ class Form(models.Model):
     visibility_choise = [("public", "Public"), ("private", "Private")]
 
     visibility = models.CharField(choices=visibility_choise)
-    proces = models.ForeignKey(Process, on_delete=models.CASCADE, related_name="forms")
+    procces = models.ForeignKey(Process, on_delete=models.CASCADE, related_name="forms")
 
     password = models.CharField(max_length=128, blank=True, null=True)
     

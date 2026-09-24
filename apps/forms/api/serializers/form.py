@@ -5,6 +5,8 @@ from ....forms.models import Form
 
 class FormSerializer(serializers.ModelSerializer):
     
+    questions = serializers.RelatedField(many=True)
+    
     password = serializers.CharField(
         write_only=True,
         required=False,                     
