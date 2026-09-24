@@ -34,27 +34,13 @@ class QuestionUpdateSerializer(serializers.ModelSerializer):
             "is_requierd",
         ]
         
-class QuestionDeleteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Question
-        fields = [
-            "id",
-        ]
-        read_only_fields = [
-            "id",
-        ]
-        
-# class QuestionOptionSerializer(serializers.ModelSerializer):
+# class QuestionDeleteSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Question
 #         fields = [
 #             "id",
-#             "text",
-#             "form",
-#             "is_requierd",
-#             "created_at",
 #         ]
 #         read_only_fields = [
 #             "id",
-#             "created_at",
 #         ]
+        

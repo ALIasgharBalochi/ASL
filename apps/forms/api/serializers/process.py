@@ -33,7 +33,7 @@ class ProcessSerializer(serializers.ModelSerializer):
                 ]
         
     def create(self, validated_data):
-            password = validated_data.pop("password")
+            password = validated_data.pop("password‍", None)
             form = Process.objects.create(**validated_data)
             form.set_password(password)
             form.save()

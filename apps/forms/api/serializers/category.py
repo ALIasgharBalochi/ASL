@@ -2,23 +2,11 @@ from rest_framework import serializers
 from ....forms.models import Category, Form
 
 class CategorySerializer(serializers.ModelSerializer):
-    
-    form = serializers.RelatedField(many=True)
-    process = serializers.RelatedField(many=True)
-    
-    
-    
-    
+
+    forms = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    process = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
     class Meta:
         model = Category
-        
-        fields = [
-            
-            "name",
-            "created_at", 
-        ]
-        
-        read_only_fields = [
-            
-                    "created_at",
-                ]
+        fields = ["name", "created_at", "forms", "process"]
+        read_only_fields = ["created_at"]

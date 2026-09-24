@@ -5,7 +5,7 @@ from ....forms.models import Form
 
 class FormSerializer(serializers.ModelSerializer):
     
-    questions = serializers.RelatedField(many=True)
+    questions = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     
     password = serializers.CharField(
         write_only=True,
@@ -18,23 +18,11 @@ class FormSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form
+        fields = ["id", "visibility", "procces", "password", "category", "created_at", "questions"]
+        read_only_fields = ["id", "created_at"]
 
-        fields = [
-            "id",
-            "visibility",
-            "proces",
-            "password",
-            "category",
-            "created_at",
-        ]
-
-        read_only_fields = [
-            "id",
-            "created_at",
-        ]
-        
     def create(self, validated_data):
-        password = validated_data.pop("password")
+        password = validated_data.pop("password", None)
         form = Form.objects.create(**validated_data)
         form.set_password(password)
         form.save()
