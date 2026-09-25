@@ -39,8 +39,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.reports",
     "rest_framework",
-    'rest_framework_simplejwt',
-
+    "rest_framework_simplejwt",
 ]
 
 MIDDLEWARE = [
@@ -124,7 +123,17 @@ MAILERS = {
 }
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     )
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    },
 }
