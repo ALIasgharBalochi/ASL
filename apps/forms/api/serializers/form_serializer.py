@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from forms.models import Form, Question, QuestionOption
+from apps.forms.models import Form, Question, QuestionOption
 
 
 class FormSerializer(serializers.ModelSerializer):
@@ -24,7 +24,7 @@ class FormSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "visibility",
-            "process",
+            "procces",
             "password",
             "category",
             "created_at",
@@ -58,6 +58,14 @@ class FormSerializer(serializers.ModelSerializer):
 
         return instance
 
+
+class FormPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={"input_type": "password"},
+        help_text="پسورد فرم را وارد کنید"
+    )
 
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
