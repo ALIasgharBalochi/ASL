@@ -6,7 +6,7 @@ from apps.forms.models import Form, Question, QuestionOption
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import viewsets
-from ..serializers.form_serializer import FormSerializer, FormPasswordSerializer
+from ..serializers.form_serializer import FormSerializer, FormPasswordSerializer,QuestionSerializer, QuestionOptionSerializer
 
 
 class FormViewSet(viewsets.ModelViewSet):
@@ -53,3 +53,23 @@ class FormViewSet(viewsets.ModelViewSet):
             return Response(FormSerializer(form).data)
         else:
             raise PermissionDenied("password is incorrect")
+
+class QuestionViewSet(viewsets.ModelViewSet):
+    serializer_class = QuestionSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "id"
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        return Question.objects.all()
+
+class QuestionOptionViewSet(viewsets.ModelViewSet):
+    serializer_class = QuestionOptionSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "id"
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        return QuestionOption.objects.all()
+
+    

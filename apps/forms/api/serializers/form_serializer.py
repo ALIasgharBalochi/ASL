@@ -67,21 +67,6 @@ class FormPasswordSerializer(serializers.Serializer):
         help_text="پسورد فرم را وارد کنید"
     )
 
-class QuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Question
-        fields = [
-            "id",
-            "text",
-            "form",
-            "is_required",
-            "created_at",
-        ]
-        read_only_fields = [
-            "id",
-            "created_at",
-        ]
-
 
 class QuestionOptionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -94,3 +79,34 @@ class QuestionOptionSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "id",
         ]
+
+class QuestionSerializer(serializers.ModelSerializer):
+    options = QuestionOptionSerializer(many=True)
+    class Meta:
+        model = Question
+        fields = [
+            "id",
+            "text",
+            "form",
+            "is_required",
+            "options",
+            "created_at",
+        ]
+        read_only_fields = [
+            "id",
+            "created_at",
+        ]
+
+    def create(self, validated_data):
+
+        options_data = validated_data.pop("options")
+
+        question = Question.objects.create(**validated_data)
+
+        for option_data in options_data:
+            QuestionOption.objects.create(
+                question=question,
+                **option_data
+            )
+
+        return question
