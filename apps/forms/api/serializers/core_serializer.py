@@ -1,8 +1,9 @@
 from rest_framework import serializers
-from forms.models import Category, Process
+from apps.forms.models import Category, Process
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    
     forms = serializers.PrimaryKeyRelatedField(
         many=True,
         read_only=True
