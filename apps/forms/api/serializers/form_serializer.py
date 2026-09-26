@@ -78,6 +78,7 @@ class QuestionOptionSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             "id",
+            "question",
         ]
 
 class QuestionSerializer(serializers.ModelSerializer):
