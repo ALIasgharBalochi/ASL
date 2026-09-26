@@ -162,3 +162,12 @@ SOCIALACCOUNT_PROVIDERS = {
 
 # after login it will redirect us to google jwt
 LOGIN_REDIRECT_URL = "/accounts/api/google/jwt/"
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    },
+}
