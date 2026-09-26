@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "apps.reports",
     "rest_framework",
     "rest_framework_simplejwt",
+    "drf_spectacular",
     # for google
     "django.contrib.sites",
     "allauth",
@@ -170,4 +171,8 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
     },
+}
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
