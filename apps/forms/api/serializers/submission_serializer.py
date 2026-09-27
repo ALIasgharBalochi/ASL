@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from forms.models import Submission, Answer, AnswerOption, Question, QuestionOption
+from ...models import Submission, Answer, AnswerOption, Question, QuestionOption
 
 
 class SubmissionSerializer(serializers.ModelSerializer):
