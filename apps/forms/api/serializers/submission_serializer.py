@@ -1,12 +1,9 @@
 from rest_framework import serializers
-from forms.models import Submission, Answer, AnswerOption
+from forms.models import Submission, Answer, AnswerOption, Question, QuestionOption
 
 
 class SubmissionSerializer(serializers.ModelSerializer):
-    answers = serializers.PrimaryKeyRelatedField(
-        many=True,
-        read_only=True
-    )
+    answers = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Submission
@@ -26,10 +23,7 @@ class SubmissionSerializer(serializers.ModelSerializer):
 
 
 class AnswerSerializer(serializers.ModelSerializer):
-    selected_options = serializers.PrimaryKeyRelatedField(
-        many=True,
-        read_only=True
-    )
+    selected_options = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Answer
@@ -59,3 +53,16 @@ class AnswerOptionSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "id",
         ]
+
+
+class SubmitAnswerSerializer(serializers.Serializer):
+    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
+    value = serializers.CharField(required=False)
+    options = serializers.PrimaryKeyRelatedField(
+        queryset=QuestionOption.objects.all(), many=True, required=False
+    )
+
+    def validate(self, attrs):
+        if not attrs.get("options") and not attrs.get("value"):
+            raise serializers.ValidationError("options or value is required ")
+        return attrs
