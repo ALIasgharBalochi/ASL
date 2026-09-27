@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from forms.models import Form, Question, QuestionOption
+from apps.forms.models import Form, Question, QuestionOption
 
 
 class FormSerializer(serializers.ModelSerializer):
@@ -24,7 +24,7 @@ class FormSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "visibility",
-            "process",
+            "procces",
             "password",
             "category",
             "created_at",
@@ -59,20 +59,13 @@ class FormSerializer(serializers.ModelSerializer):
         return instance
 
 
-class QuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Question
-        fields = [
-            "id",
-            "text",
-            "form",
-            "is_required",
-            "created_at",
-        ]
-        read_only_fields = [
-            "id",
-            "created_at",
-        ]
+class FormPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={"input_type": "password"},
+        help_text="پسورد فرم را وارد کنید"
+    )
 
 
 class QuestionOptionSerializer(serializers.ModelSerializer):
@@ -85,4 +78,36 @@ class QuestionOptionSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             "id",
+            "question",
         ]
+
+class QuestionSerializer(serializers.ModelSerializer):
+    options = QuestionOptionSerializer(many=True)
+    class Meta:
+        model = Question
+        fields = [
+            "id",
+            "text",
+            "form",
+            "is_required",
+            "options",
+            "created_at",
+        ]
+        read_only_fields = [
+            "id",
+            "created_at",
+        ]
+
+    def create(self, validated_data):
+
+        options_data = validated_data.pop("options")
+
+        question = Question.objects.create(**validated_data)
+
+        for option_data in options_data:
+            QuestionOption.objects.create(
+                question=question,
+                **option_data
+            )
+
+        return question

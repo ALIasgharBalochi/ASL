@@ -24,7 +24,7 @@ class Process(models.Model):
     password = models.CharField(max_length=128, blank=True, null=True)
         
     category = models.ForeignKey(
-        Category, on_delete=models.CASCADE, related_name="process"
+        Category, on_delete=models.CASCADE, related_name="process", blank=True, null=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -72,7 +72,7 @@ class Form(models.Model):
 class Question(models.Model):
     text = models.CharField(max_length=150)
     form = models.ForeignKey(Form, on_delete=models.CASCADE, related_name="questions")
-    is_requierd = models.BooleanField(default=False)
+    is_required = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
