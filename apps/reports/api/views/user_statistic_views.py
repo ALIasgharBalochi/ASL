@@ -47,7 +47,7 @@ class UserReportAPIView(APIView):
                     }
                 )
 
-            elif question.type == "select":
+            elif question.type == ["select",'checkbox']:
 
                 options = question.options.annotate(answer_count=Count("answers"))
 
