@@ -68,10 +68,10 @@ class SubmitAnswerSerializer(serializers.Serializer):
         options = attrs.get("options")
         value = attrs.get("value")
 
-        # this part is for checking if the number and text type of question has the right input(values not options)
-        # it checks if there is a value and also checks that there shouldn't be an option for number and text type of question
+        # this part is for checking if the text type of question has the right input(values not options)
+        # it checks if there is a value and also checks that there shouldn't be an option for text type of question
 
-        if question.type in ["number", "text"]:
+        if question.type == "text":
 
             if not value:
                 raise serializers.ValidationError({"value": "this field is required"})
@@ -80,6 +80,25 @@ class SubmitAnswerSerializer(serializers.Serializer):
                 raise serializers.ValidationError(
                     {"options": "options is not allowed for this question"}
                 )
+
+        # this part is for checking if the number type of question has the right input(values not options)
+        # it checks if there is a value and also checks that there shouldn't be an option for number type of question
+
+        if question.type == "number":
+
+            if not value:
+                raise serializers.ValidationError({"value": "this field is required"})
+
+            if options:
+                raise serializers.ValidationError(
+                    {"options": "options is not allowed for this question"}
+                )
+
+            try:
+                float(value)
+            except (ValueError,TypeError):
+                raise serializers.ValidationError({'value': 'value should be type number'})
+            
 
         # this part is for checking if the select type of question has the right input(values not options)
         # it checks if there is at least an option and also checks that there shouldn't be an value for select type of question
@@ -98,6 +117,9 @@ class SubmitAnswerSerializer(serializers.Serializer):
                 raise serializers.ValidationError(
                     {"value": "value is not allowed for this question type (select)"}
                 )
+
+        # this part is for checking if the select type of question has the right input(values not options)
+        # it checks if there is an option and also checks that there shouldn't be an value for checkbox type of question
 
         elif question.type == "checkbox":
 
