@@ -19,7 +19,26 @@ class UserReportAPIView(APIView):
         for question in questions:
 
             if question.type == 'number':
-                pass
+
+                answers = question.answers.all()
+
+                values = []
+
+                for answer in answers:
+
+                    values.append(answer.value)
+
+                report.append(
+                    {
+                        'question' : question.value,
+                        'type' : question.type,
+                        'sum' : sum(values),
+                        'count' : len(values),
+                        'average' : sum(values) / len(values),
+                        'min' : min(values),
+                        'max' : max(values),
+                    }
+                )
 
             elif question.type == 'select':
                 pass
@@ -28,4 +47,4 @@ class UserReportAPIView(APIView):
                 pass
 
 
-        return Response()
+        return Response(report)
