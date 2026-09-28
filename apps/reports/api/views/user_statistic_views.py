@@ -4,7 +4,8 @@ from django.db.models.functions import Cast
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from apps.forms.models import Form
+from apps.forms.models import Form , Process
+from apps.reports.services import get_form_report
 
 
 class UserReportAPIView(APIView):
@@ -15,63 +16,36 @@ class UserReportAPIView(APIView):
 
         form = get_object_or_404(Form, pk=pk)
 
-        questions = form.questions.all()
-
-        report = []
-
-        for question in questions:
-
-            if question.type == "number":
-
-                answers = question.answers.all()
-
-                values = []
-
-                answers = question.answers.annotate(
-                    numeric_value=Cast("value", FloatField())
-                )
-
-                statistics = answers.aggregate(
-                    count=Count("id"),
-                    sum=Sum("numeric_value"),
-                    average=Avg("numeric_value"),
-                    min=Min("numeric_value"),
-                    max=Max("numeric_value"),
-                )
-
-                report.append(
-                    {
-                        "question": question.text,
-                        "type": question.type,
-                        "statistics": statistics,
-                    }
-                )
-
-            elif question.type in ["select",'checkbox']:
-
-                options = question.options.annotate(answer_count=Count("answers"))
-
-                options_report = []
-
-                for option in options:
-
-                    count = option.answers.count()
-
-                    options_report.append(
-                        {
-                            "id": option.id,
-                            "value": option.value,
-                            "count": count,
-                        }
-                    )
-
-                report.append(
-                    {
-                        "question": question.text,
-                        "type": question.type,
-                        "options": options_report,
-                    }
-                )
-
+        report = get_form_report(form)
 
         return Response(report)
+
+        
+
+class ProcessReportAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+
+        process = get_object_or_404(
+            Process,
+            id=pk
+        )
+
+        total_submissions = 0
+        forms_report = []
+
+        for form in process.forms.all():
+            total_submissions += form.submissions.count()
+
+            forms_report.append({
+                "id": form.id,
+                "report": get_form_report(form),
+            })
+
+        return Response({
+            "process": process.id,
+            "views": process.views,
+            "total_submissions": total_submissions,
+            "forms": forms_report,
+        })

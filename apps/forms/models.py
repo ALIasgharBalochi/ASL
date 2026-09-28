@@ -20,6 +20,7 @@ class Process(models.Model):
 
     visibility = models.CharField(choices=visibility_choise)
     type = models.CharField(choices=process_type)
+    views = models.PositiveIntegerField(default=0)
 
     password = models.CharField(max_length=128, blank=True, null=True)
         
