@@ -70,10 +70,17 @@ class Form(models.Model):
 
 
 class Question(models.Model):
+    QUESTION_TYPE = [
+        ('text','Text'),
+        ('select','Select'),
+        ('number','Number'),
+        ('checkbox','Chehckbox'),
+    ]
+
     text = models.CharField(max_length=150)
     form = models.ForeignKey(Form, on_delete=models.CASCADE, related_name="questions")
     is_required = models.BooleanField(default=False)
-
+    type = models.CharField(max_length=30,choices=QUESTION_TYPE,default=QUESTION_TYPE[0][0])
     created_at = models.DateTimeField(auto_now_add=True)
 
 

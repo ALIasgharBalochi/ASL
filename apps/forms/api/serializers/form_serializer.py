@@ -89,6 +89,7 @@ class QuestionSerializer(serializers.ModelSerializer):
             "id",
             "text",
             "form",
+            "type"
             "is_required",
             "options",
             "created_at",
@@ -100,7 +101,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
-        options_data = validated_data.pop("options")
+        options_data = validated_data.pop("options",[])
 
         question = Question.objects.create(**validated_data)
 
