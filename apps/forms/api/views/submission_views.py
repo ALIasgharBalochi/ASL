@@ -4,10 +4,15 @@ from rest_framework.permissions import AllowAny
 from ..serializers.submission_serializer import SubmitAnswerSerializer
 from ...models import Submission, Answer, AnswerOption
 from django.db import transaction
+from drf_spectacular.utils import extend_schema
 
 
 class SubmitAnswerView(APIView):
     permission_classes = [AllowAny]
+
+    @extend_schema(
+        request=SubmitAnswerSerializer,
+    )
 
     def post(self, request):
         serialiser = SubmitAnswerSerializer(many=True, data=request.data)
