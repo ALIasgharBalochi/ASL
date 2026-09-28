@@ -96,9 +96,17 @@ class SubmitAnswerSerializer(serializers.Serializer):
 
             if value:
                 raise serializers.ValidationError(
-                    {"value": "value is not allowed for this question"}
+                    {"value": "value is not allowed for this question type (select)"}
                 )
 
-            
+        elif question.type == "checkbox":
+
+            if not options:
+                raise serializers.ValidationError({"options": "this field is required"})
+
+            if value:
+                raise serializers.ValidationError(
+                    {"value": "value is not allowed for this question type (checkbox)"}
+                )
 
         return attrs
