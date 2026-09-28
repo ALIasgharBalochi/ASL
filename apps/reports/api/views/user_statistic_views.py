@@ -49,9 +49,11 @@ class UserReportAPIView(APIView):
 
             elif question.type == "select":
 
+                options = question.options.annotate(answer_count=Count("answers"))
+
                 options_report = []
 
-                for option in question.options.all():
+                for option in options:
 
                     count = option.answers.count()
 
@@ -62,7 +64,7 @@ class UserReportAPIView(APIView):
                             "count": count,
                         }
                     )
-                    
+
                 report.append(
                     {
                         "question": question.text,
