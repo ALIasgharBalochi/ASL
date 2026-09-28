@@ -28,10 +28,7 @@ class UserReportAPIView(APIView):
                 values = []
 
                 answers = question.answers.annotate(
-                    numeric_value=Cast(
-                        'value',
-                        FloatField()
-                    )
+                    numeric_value=Cast("value", FloatField())
                 )
 
                 statistics = answers.aggregate(
@@ -42,14 +39,37 @@ class UserReportAPIView(APIView):
                     max=Max("numeric_value"),
                 )
 
-                report.append({
-                    "question" : question.text, 
-                    "type" : question.type, 
-                    "statistics" : statistics, 
-                })
+                report.append(
+                    {
+                        "question": question.text,
+                        "type": question.type,
+                        "statistics": statistics,
+                    }
+                )
 
             elif question.type == "select":
-                pass
+
+                options_report = []
+
+                for option in question.options.all():
+
+                    count = option.answers.count()
+
+                    options_report.append(
+                        {
+                            "id": option.id,
+                            "value": option.value,
+                            "count": count,
+                        }
+                    )
+                    
+                report.append(
+                    {
+                        "question": question.text,
+                        "type": question.type,
+                        "options": options_report,
+                    }
+                )
 
             elif question.type == "checkbox":
                 pass
