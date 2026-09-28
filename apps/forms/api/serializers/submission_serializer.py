@@ -63,6 +63,24 @@ class SubmitAnswerSerializer(serializers.Serializer):
     )
 
     def validate(self, attrs):
-        if not attrs.get("options") and not attrs.get("value"):
-            raise serializers.ValidationError("options or value is required ")
+
+        question = attrs['question']
+        options = attrs.get("options")
+        value = attrs.get("value")
+
+        # this part is for checking if the number and text type of question has the right input(values not options)
+
+        if question.type in ['number','text']:
+
+            if not value:
+                raise serializers.ValidationError(
+                    {'value':'this field is required'}
+                )
+
+            if options:
+                raise serializers.ValidationError(
+                    {'options':'options is not allowed for this question'}
+                )
+
+
         return attrs
