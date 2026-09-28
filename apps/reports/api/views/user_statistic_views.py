@@ -1,4 +1,6 @@
 from django.shortcuts import get_object_or_404
+from django.db.models import Count, Sum, Avg, Min, Max, FloatField
+from django.db.models.functions import Cast
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -25,35 +27,26 @@ class UserReportAPIView(APIView):
 
                 values = []
 
-                for answer in answers:
-
-                    values.append(float(answer.value))
-
-                if values:
-                    statistic = {
-                        "sum": sum(values),
-                        "count": len(values),
-                        "average": sum(values) / len(values),
-                        "min": min(values),
-                        "max": max(values),
-                    }
-
-                else:
-                    statistic = {
-                        "sum": 0,
-                        "count": 0,
-                        "average": None,
-                        "min": None,
-                        "max": None,
-                    }
-
-                report.append(
-                    {
-                        "question": question.text,
-                        "type": question.type,
-                        "statistic": statistic,
-                    }
+                answers = question.answers.annotate(
+                    numeric_value=Cast(
+                        'value',
+                        FloatField()
+                    )
                 )
+
+                statistics = answers.aggregate(
+                    count=Count("id"),
+                    sum=Sum("numeric_value"),
+                    average=Avg("numeric_value"),
+                    min=Min("numeric_value"),
+                    max=Max("numeric_value"),
+                )
+
+                report.append({
+                    "question" : question.text, 
+                    "type" : question.type, 
+                    "statistics" : statistics, 
+                })
 
             elif question.type == "select":
                 pass
