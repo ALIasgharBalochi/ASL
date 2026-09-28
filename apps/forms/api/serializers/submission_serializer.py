@@ -131,4 +131,14 @@ class SubmitAnswerSerializer(serializers.Serializer):
                     {"value": "value is not allowed for this question type (checkbox)"}
                 )
 
+        if options:
+
+            for option in options:
+                if option.question_id != question.id:
+                    raise serializers.ValidationError(
+                        {
+                            "options": "Selected option does not belong to this question."
+                        }
+                    )
+
         return attrs
