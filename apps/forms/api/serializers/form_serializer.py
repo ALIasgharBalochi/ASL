@@ -89,7 +89,7 @@ class QuestionSerializer(serializers.ModelSerializer):
             "id",
             "text",
             "form",
-            "type"
+            "type",
             "is_required",
             "options",
             "created_at",
