@@ -2,7 +2,8 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from apps.forms.models import Category, Process
 from ..serializers.core_serializer import CategorySerializer, ProcessSerializer
-
+from rest_framework.response import Response
+from django.db.models import F
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -17,3 +18,15 @@ class ProcessViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def retrieve(self, request, *args, **kwargs):
+        process = self.get_object()
+
+        process.views = F("views") + 1
+        process.save(update_fields=["views"])
+
+        process.refresh_from_db()
+
+        serializer = self.get_serializer(process)
+
+        return Response(serializer.data)
