@@ -1,12 +1,19 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 # from rest_framework import status
 from apps.forms.models import Form, Question, QuestionOption
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import viewsets
-from ..serializers.form_serializer import FormSerializer, FormPasswordSerializer,QuestionSerializer, QuestionOptionSerializer
+from ..serializers.form_serializer import (
+    FormSerializer,
+    FormPasswordSerializer,
+    QuestionSerializer,
+    QuestionOptionSerializer,
+)
 
 
 class FormViewSet(viewsets.ModelViewSet):
@@ -25,6 +32,7 @@ class FormViewSet(viewsets.ModelViewSet):
 
         return [IsAuthenticated()]
 
+    @method_decorator(cache_page(60 * 5))
     def retrieve(self, request, *args, **kwargs):
 
         form = self.get_object()
@@ -54,6 +62,9 @@ class FormViewSet(viewsets.ModelViewSet):
         else:
             raise PermissionDenied("password is incorrect")
 
+
+@method_decorator(cache_page(60 * 5), name="list")
+@method_decorator(cache_page(60 * 5), name="retrieve")
 class QuestionViewSet(viewsets.ModelViewSet):
     serializer_class = QuestionSerializer
     permission_classes = [IsAuthenticated]
@@ -63,6 +74,9 @@ class QuestionViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Question.objects.all()
 
+
+@method_decorator(cache_page(60 * 5), name="list")
+@method_decorator(cache_page(60 * 5), name="retrieve")
 class QuestionOptionViewSet(viewsets.ModelViewSet):
     serializer_class = QuestionOptionSerializer
     permission_classes = [IsAuthenticated]
@@ -71,5 +85,3 @@ class QuestionOptionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return QuestionOption.objects.all()
-
-    

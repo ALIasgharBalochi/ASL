@@ -7,18 +7,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('forms', '0001_initial'),
+        ("forms", "0001_initial"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='form',
-            old_name='proces',
-            new_name='procces',
+            model_name="form",
+            old_name="proces",
+            new_name="process",
         ),
         migrations.AlterField(
-            model_name='process',
-            name='category',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='process', to='forms.category'),
+            model_name="process",
+            name="category",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="process",
+                to="forms.category",
+            ),
         ),
     ]

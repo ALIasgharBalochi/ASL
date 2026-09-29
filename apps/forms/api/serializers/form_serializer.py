@@ -3,10 +3,7 @@ from apps.forms.models import Form, Question, QuestionOption
 
 
 class FormSerializer(serializers.ModelSerializer):
-    questions = serializers.PrimaryKeyRelatedField(
-        many=True,
-        read_only=True
-    )
+    questions = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     password = serializers.CharField(
         write_only=True,
@@ -24,7 +21,7 @@ class FormSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "visibility",
-            "procces",
+            "process",
             "password",
             "category",
             "created_at",
@@ -64,7 +61,7 @@ class FormPasswordSerializer(serializers.Serializer):
         write_only=True,
         required=True,
         style={"input_type": "password"},
-        help_text="پسورد فرم را وارد کنید"
+        help_text="پسورد فرم را وارد کنید",
     )
 
 
@@ -81,8 +78,10 @@ class QuestionOptionSerializer(serializers.ModelSerializer):
             "question",
         ]
 
+
 class QuestionSerializer(serializers.ModelSerializer):
     options = QuestionOptionSerializer(many=True)
+
     class Meta:
         model = Question
         fields = [
@@ -101,14 +100,11 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
-        options_data = validated_data.pop("options",[])
+        options_data = validated_data.pop("options", [])
 
         question = Question.objects.create(**validated_data)
 
         for option_data in options_data:
-            QuestionOption.objects.create(
-                question=question,
-                **option_data
-            )
+            QuestionOption.objects.create(question=question, **option_data)
 
         return question

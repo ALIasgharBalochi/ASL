@@ -1,10 +1,15 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from apps.forms.models import Category, Process
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from ..serializers.core_serializer import CategorySerializer, ProcessSerializer
 from rest_framework.response import Response
 from django.db.models import F
 
+
+@method_decorator(cache_page(60 * 5), name="list")
+@method_decorator(cache_page(60 * 5), name="retrieve")
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
