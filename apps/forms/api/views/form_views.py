@@ -1,13 +1,13 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-# from rest_framework import status
+from rest_framework import status
 from apps.forms.models import Form, Question, QuestionOption
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import viewsets
 from ..serializers.form_serializer import FormSerializer, FormPasswordSerializer,QuestionSerializer, QuestionOptionSerializer
-
+from rest_framework.reverse import reverse
 
 class FormViewSet(viewsets.ModelViewSet):
     serializer_class = FormSerializer
@@ -53,6 +53,29 @@ class FormViewSet(viewsets.ModelViewSet):
             return Response(FormSerializer(form).data)
         else:
             raise PermissionDenied("password is incorrect")
+
+    def create(self,request,*args,**kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        form = serializer.save()
+
+        public_link = requestr.build_absolute_url(
+            reverse(
+                'form-detail',
+                kwargs={'id':form.id},
+                request=request
+            )
+        )
+
+        return Response(
+            {
+                "form":serializer.data,
+                "public_link":public_link
+
+            },
+            status=status.HTTP_201_CREATED
+        )
 
 class QuestionViewSet(viewsets.ModelViewSet):
     serializer_class = QuestionSerializer
