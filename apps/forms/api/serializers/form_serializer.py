@@ -82,7 +82,11 @@ class QuestionOptionSerializer(serializers.ModelSerializer):
         ]
 
 class QuestionSerializer(serializers.ModelSerializer):
-    options = QuestionOptionSerializer(many=True)
+    
+    options = QuestionOptionSerializer(
+    many=True,
+    required=False,
+)
     class Meta:
         model = Question
         fields = [
@@ -112,3 +116,21 @@ class QuestionSerializer(serializers.ModelSerializer):
             )
 
         return question
+    
+    
+    def validate(self, attrs):
+        question_type = attrs.get("type")
+        options = attrs.get("options", [])
+
+        if question_type in ["text", "number"] and options:
+            raise serializers.ValidationError({
+                "options": "options is not allowed for this question type"
+            })
+
+        if question_type in ["select", "checkbox"] and not options:
+            raise serializers.ValidationError({
+                "options": "this field is required"
+            })
+
+        return attrs
+    
