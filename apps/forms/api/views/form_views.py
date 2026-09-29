@@ -60,7 +60,7 @@ class FormViewSet(viewsets.ModelViewSet):
 
         form = serializer.save()
 
-        public_link = requestr.build_absolute_url(
+        public_link = request.build_absolute_uri(
             reverse(
                 'form-detail',
                 kwargs={'id':form.id},
