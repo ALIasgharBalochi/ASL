@@ -6,9 +6,12 @@ from rest_framework.response import Response
 from django.db.models import F
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
+
+    # here each user gets its own categories
+    def get_queryset(self):
+        return Category.objects.filter(user=self.request.user)
 
 
 class ProcessViewSet(viewsets.ModelViewSet):
