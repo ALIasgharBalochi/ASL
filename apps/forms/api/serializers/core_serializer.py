@@ -27,7 +27,7 @@ class CategorySerializer(serializers.ModelSerializer):
             "id",
             "created_at",
             "forms",
-            "processes",
+            "process",
         ]
 
 
