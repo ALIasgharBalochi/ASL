@@ -109,5 +109,5 @@ class FormPasswordSerializer(serializers.Serializer):
         write_only=True,
         required=True,
         style={"input_type": "password"},
-        help_text="پسورد فرم را وارد کنید"
+        help_text="please enter your password"
     )

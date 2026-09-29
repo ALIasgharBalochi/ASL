@@ -81,3 +81,12 @@ class ProcessSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+    
+# it checks the password for process
+class ProcessPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={"input_type": "password"},
+        help_text="please enter your password"
+    )
