@@ -8,6 +8,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework import viewsets
 from ..serializers.form_serializer import FormSerializer, FormPasswordSerializer,QuestionSerializer, QuestionOptionSerializer
 
+from django.db.models import F
 
 class FormViewSet(viewsets.ModelViewSet):
     serializer_class = FormSerializer
@@ -28,15 +29,18 @@ class FormViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
 
         form = self.get_object()
+        
+        form.views = F("views") + 1
+        form.save(update_fields=["views"])
+        form.refresh_from_db()
 
         if form.password:
-            return Response({"detail": "this form is password pritected"})
+            return Response({"detail": "this form is password protected"})
 
         serializer = self.get_serializer(form)
-
         return Response(serializer.data)
 
-    @action(detail=True, methods=["post"], url_path="unlock")
+    @action(detail=True, methods=["GET"], url_path="unlock")
     def unlock(self, request, id=None):
 
         form = self.get_object()

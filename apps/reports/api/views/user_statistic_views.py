@@ -27,26 +27,26 @@ class ProcessReportAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
-
         process = get_object_or_404(Process, id=pk)
 
+        total_views = 0
         total_submissions = 0
         forms_report = []
 
         for form in process.forms.all():
+            total_views += form.views
             total_submissions += form.submissions.count()
 
-            forms_report.append(
-                {
-                    "id": form.id,
-                    "report": get_form_report(form),
-                }
-            )
+            forms_report.append({
+                "id": form.id,
+                "views": form.views,
+                "report": get_form_report(form),
+            })
 
         return Response(
             {
                 "process": process.id,
-                "views": process.views,
+                "views": total_views,
                 "total_submissions": total_submissions,
                 "forms": forms_report,
             }
