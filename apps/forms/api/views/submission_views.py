@@ -4,11 +4,16 @@ from rest_framework.permissions import AllowAny
 from ..serializers.submission_serializer import SubmitAnswerSerializer
 from ...models import Submission, Answer, AnswerOption
 from django.db import transaction
+from drf_spectacular.utils import extend_schema
+from ....reports.services import send_report_update
 
 
 class SubmitAnswerView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        request=SubmitAnswerSerializer,
+    )
     def post(self, request):
         serialiser = SubmitAnswerSerializer(many=True, data=request.data)
 
@@ -40,6 +45,8 @@ class SubmitAnswerView(APIView):
                         )
 
                 AnswerOption.objects.bulk_create(answere_option_create)
+
+                transaction.on_commit(lambda: send_report_update(submission.form.id))
             return Response({"message": "answer created successfuly"}, status=200)
         except Exception as e:
             print(e)

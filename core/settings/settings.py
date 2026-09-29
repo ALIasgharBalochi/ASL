@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "apps.forms",
     "apps.accounts",
     "apps.reports",
+    "channels",
     "rest_framework",
     "rest_framework_simplejwt",
     "drf_spectacular",
@@ -140,7 +141,9 @@ MAILERS = {
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    )
+        "rest_framework.authentication.BasicAuthentication",
+    ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SOCIALACCOUNT_PROVIDERS = {
@@ -176,4 +179,13 @@ CACHES = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+}
+ASGI_APPLICATION = "core.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", 6379)],
+        },
+    },
 }
