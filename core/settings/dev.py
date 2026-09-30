@@ -18,19 +18,30 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
-
 MAILERS = {
     "default": {
         "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
         "OPTIONS": {
-            "host": "smtp.gmail.com",
-            "port": 587,
+            "host": os.getenv("EMAIL_HOST", "smtp.gmail.com"),
+            "port": int(os.getenv("EMAIL_PORT", 587)),
             "username": os.getenv("EMAIL_HOST_USER"),
-            "password": os.getenv("EMAIL_HOST_PASSWORD"),
+            "password": os.getenv("EMAIL_APP_PASSWORD"),
             "use_tls": True,
         },
     },
 }
+# MAILERS = {
+#     "default": {
+#         "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
+#         "OPTIONS": {
+#             "host": "smtp.gmail.com",
+#             "port": 587,
+#             "username": os.getenv("EMAIL_HOST_USER"),
+#             "password": os.getenv("EMAIL_HOST_PASSWORD"),
+#             "use_tls": True,
+#         },
+#     },
+# }
 
 # Celery
 CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
@@ -51,7 +62,6 @@ CELERY_BEAT_SCHEDULE = {
         ),
         "args": ("weekly",),
     },
-
     "monthly-report": {
         "task": "apps.reports.tasks.generate_periodic_report",
         "schedule": crontab(
