@@ -7,9 +7,9 @@ ALLOWED_HOSTS = ["example.ir"]
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "asl_db",
-        "USER": "asl_user",
-        "PASSWORD": "123456",
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
         "HOST": "localhost",
         "PORT": "5432",
     }

@@ -105,7 +105,7 @@ def get_period_reporting(start, end):
 
     form_count = forms.count()
 
-    total_view = forms.aggregate(total_view=Sum("process__views"))
+    total_view = forms.aggregate(total_view=Sum("views"))
 
     total_submissions = Submission.objects.filter(
         created_at__gte=start,
@@ -121,8 +121,7 @@ def get_period_reporting(start, end):
 
 def get_reporting_realtime_form(form_id):
     total_submissions = Submission.objects.filter(form__id=form_id).count() or 0
-    total_view = Process.objects.get(forms__id=form_id).views or 0
-    # total_view = Form.objects.get(id=form_id).views or 0
+    total_view = Form.objects.get(id=form_id).views or 0
     return {
         "total_submissions": total_submissions,
         "total_views": total_view,
