@@ -1,11 +1,16 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from apps.forms.models import Category, Process
-from ..serializers.core_serializer import CategorySerializer, ProcessSerializer,ProcessPasswordSerializer
+from ..serializers.core_serializer import (
+    CategorySerializer,
+    ProcessSerializer,
+    ProcessPasswordSerializer,
+)
 from rest_framework.response import Response
 from django.db.models import F
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
@@ -24,15 +29,15 @@ class ProcessViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-    def retrieve(self, request, *args, **kwargs):
-        process = self.get_object()
+        # def retrieve(self, request, *args, **kwargs):
+        #     process = self.get_object()
 
-        process.views = F("views") + 1
-        process.save(update_fields=["views"])
+        #     process.views = F("views") + 1
+        #     process.save(update_fields=["views"])
 
-        process.refresh_from_db()
+        #     process.refresh_from_db()
 
-        serializer = self.get_serializer(process)
+        #     serializer = self.get_serializer(process)
 
         return Response(serializer.data)
 
@@ -40,9 +45,7 @@ class ProcessViewSet(viewsets.ModelViewSet):
         process = self.get_object()
 
         if process.password:
-            return Response({
-                "detail": "this process is password protected"
-            })
+            return Response({"detail": "this process is password protected"})
 
         return Response(ProcessSerializer(process).data)
 
@@ -60,5 +63,3 @@ class ProcessViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("password is incorrect")
 
         return Response(ProcessSerializer(process).data)
-
-    

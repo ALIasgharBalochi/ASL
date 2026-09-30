@@ -20,7 +20,7 @@ class Process(models.Model):
 
     visibility = models.CharField(choices=visibility_choise)
     type = models.CharField(choices=process_type)
-    views = models.PositiveIntegerField(default=0)
+    
 
     password = models.CharField(max_length=128, blank=True, null=True)
         
@@ -50,6 +50,8 @@ class Form(models.Model):
     procces = models.ForeignKey(Process, on_delete=models.CASCADE, related_name="forms")
 
     password = models.CharField(max_length=128, blank=True, null=True)
+    
+    views = models.PositiveIntegerField(default=0)
     
     category = models.ForeignKey(
         Category, on_delete=models.CASCADE, related_name="forms"

@@ -9,7 +9,7 @@ class CategorySerializer(serializers.ModelSerializer):
         read_only=True
     )
 
-    processes = serializers.PrimaryKeyRelatedField(
+    process = serializers.PrimaryKeyRelatedField(
         many=True,
         read_only=True
     )
@@ -21,13 +21,13 @@ class CategorySerializer(serializers.ModelSerializer):
             "name",
             "created_at",
             "forms",
-            "processes",
+            "process",
         ]
         read_only_fields = [
             "id",
             "created_at",
             "forms",
-            "processes",
+            "process",
         ]
 
 
