@@ -56,6 +56,8 @@ class Form(models.Model):
 
     views = models.PositiveIntegerField(default=0)
 
+    order = models.PositiveIntegerField(default=1)
+
     category = models.ForeignKey(
         Category, on_delete=models.CASCADE, related_name="forms"
     )
@@ -114,6 +116,13 @@ class Submission(models.Model):
         blank=True,
         related_name="submissions",
     )
+
+    session_id = models.UUIDField(
+        null=True,
+        blank=True,
+        db_index=True,
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True)
 
 
