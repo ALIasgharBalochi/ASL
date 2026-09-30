@@ -9,7 +9,7 @@ class CategorySerializer(serializers.ModelSerializer):
         read_only=True
     )
 
-    processes = serializers.PrimaryKeyRelatedField(
+    process = serializers.PrimaryKeyRelatedField(
         many=True,
         read_only=True
     )
@@ -21,13 +21,13 @@ class CategorySerializer(serializers.ModelSerializer):
             "name",
             "created_at",
             "forms",
-            "processes",
+            "process",
         ]
         read_only_fields = [
             "id",
             "created_at",
             "forms",
-            "processes",
+            "process",
         ]
 
 
@@ -81,3 +81,12 @@ class ProcessSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+    
+# it checks the password for process
+class ProcessPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={"input_type": "password"},
+        help_text="please enter your password"
+    )

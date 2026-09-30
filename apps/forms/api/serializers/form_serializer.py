@@ -2,8 +2,54 @@ from rest_framework import serializers
 from apps.forms.models import Form, Question, QuestionOption
 
 
+class QuestionOptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuestionOption
+        fields = [
+            "id",
+            "question",
+            "value",
+        ]
+        read_only_fields = [
+            "id",
+            "question",
+        ]
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    options = QuestionOptionSerializer(many=True)
+
+    class Meta:
+        model = Question
+        fields = [
+            "id",
+            "text",
+            "form",
+            "type",
+            "is_required",
+            "options",
+            "created_at",
+        ]
+        read_only_fields = [
+            "id",
+            "created_at",
+        ]
+
+    def create(self, validated_data):
+
+        options_data = validated_data.pop("options", [])
+
+        question = Question.objects.create(**validated_data)
+
+        for option_data in options_data:
+            QuestionOption.objects.create(question=question, **option_data)
+
+        return question
+
+
 class FormSerializer(serializers.ModelSerializer):
-    questions = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    # instead of getting the id of each question we will show the question
+    questions = QuestionSerializer(many=True, read_only=True)
 
     password = serializers.CharField(
         write_only=True,
@@ -61,7 +107,7 @@ class FormPasswordSerializer(serializers.Serializer):
         write_only=True,
         required=True,
         style={"input_type": "password"},
-        help_text="پسورد فرم را وارد کنید",
+        help_text="please enter your password",
     )
 
 
@@ -80,7 +126,11 @@ class QuestionOptionSerializer(serializers.ModelSerializer):
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-    options = QuestionOptionSerializer(many=True)
+
+    options = QuestionOptionSerializer(
+        many=True,
+        required=False,
+    )
 
     class Meta:
         model = Question
@@ -108,3 +158,17 @@ class QuestionSerializer(serializers.ModelSerializer):
             QuestionOption.objects.create(question=question, **option_data)
 
         return question
+
+    def validate(self, attrs):
+        question_type = attrs.get("type")
+        options = attrs.get("options", [])
+
+        if question_type in ["text", "number"] and options:
+            raise serializers.ValidationError(
+                {"options": "options is not allowed for this question type"}
+            )
+
+        if question_type in ["select", "checkbox"] and not options:
+            raise serializers.ValidationError({"options": "this field is required"})
+
+        return attrs
