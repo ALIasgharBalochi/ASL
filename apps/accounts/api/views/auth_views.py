@@ -11,10 +11,12 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+from drf_spectacular.utils import extend_schema
 
 class RegistratoinView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(request=RegistrationSerializer, responses={200: RegistrationSerializer})
     def post(self, request):
         serialiser = RegistrationSerializer(data=request.data)
 
@@ -43,33 +45,34 @@ class RegistratoinView(APIView):
                 "OTP code",
             )
 
-            print(otp_code)
-            return Response(
-                {
-                    "message": "code send successfuly",
-                    "regestratoin_id": registratin_id,
-                },
-                status=200,
-            )
-            # if sending_code == 1:
-            #     return Response(
-            #         {
-            #             "message": "code send successfuly",
-            #             "regestratoin_id": registratin_id,
-            #         },
-            #         status=200,
-            #     )
-            # else:
-            #     AccountService.delete_registration_data(
-            #         f"registration:{registratin_id}",
-            #         f"registration:{registratin_id}:otp",
-            #     )
-            #     return Response({"message": "send otp faield"}, status=400)
+            # print(otp_code)
+            # return Response(
+            #     {
+            #         "message": "code send successfuly",
+            #         "regestratoin_id": registratin_id,
+            #     },
+            #     status=200,
+            # )
+            if sending_code == 1:
+                return Response(
+                    {
+                        "message": "code send successfuly",
+                        "regestratoin_id": registratin_id,
+                    },
+                    status=200,
+                )
+            else:
+                AccountService.delete_registration_data(
+                    f"registration:{registratin_id}",
+                    f"registration:{registratin_id}:otp",
+                )
+                return Response({"message": "send otp faield"}, status=400)
 
 
 class VerifyOtp(APIView):
     permission_classes = [AllowAny]
-
+    
+    @extend_schema(request=VerifyOtpSerialiser, responses={200: VerifyOtpSerialiser})
     def post(self, request):
         serializer = VerifyOtpSerialiser(data=request.data)
 
@@ -97,7 +100,8 @@ class VerifyOtp(APIView):
 class RegenerateOtp(APIView):
 
     permission_classes = [AllowAny]
-
+    
+    @extend_schema(request=ReGenerateOtp, responses={200: ReGenerateOtp})
     def post(self, request):
         serializer = ReGenerateOtp(data=request.data)
 
@@ -119,26 +123,26 @@ class RegenerateOtp(APIView):
                 data[b"email"].decode(),
                 "OTP code",
             )
-            print(otp_code)
-            return Response(
-                {
-                    "message": "code send successfuly",
-                    "regestratoin_id": registratoin_id,
-                },
-                status=200,
-            )
-            # if sending_code == 1:
+            # print(otp_code)
+            # return Response(
+            #     {
+            #         "message": "code send successfuly",
+            #         "regestratoin_id": registratoin_id,
+            #     },
+            #     status=200,
+            # )
+            if sending_code == 1:
 
-            #     return Response(
-            #         {
-            #             "message": "code send successfuly",
-            #             "regestratoin_id": registratoin_id,
-            #         },
-            #         status=200,
-            #     )
-            # else:
-            #     AccountService.delete_registration_data(
-            #         f"registration:{registratoin_id}",
-            #         f"registration:{registratoin_id}:otp",
-            #     )
-            #     return Response({"message": "send otp faield"}, status=400)
+                return Response(
+                    {
+                        "message": "code send successfuly",
+                        "regestratoin_id": registratoin_id,
+                    },
+                    status=200,
+                )
+            else:
+                AccountService.delete_registration_data(
+                    f"registration:{registratoin_id}",
+                    f"registration:{registratoin_id}:otp",
+                )
+                return Response({"message": "send otp faield"}, status=400)
