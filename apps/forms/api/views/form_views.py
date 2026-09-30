@@ -1,5 +1,7 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 from rest_framework import status
 from apps.forms.models import Form, Question, QuestionOption
@@ -33,6 +35,7 @@ class FormViewSet(viewsets.ModelViewSet):
 
         return [IsAuthenticated()]
 
+    @method_decorator(cache_page(60 * 5))
     def retrieve(self, request, *args, **kwargs):
 
         form = self.get_object()
@@ -81,6 +84,8 @@ class FormViewSet(viewsets.ModelViewSet):
         )
 
 
+@method_decorator(cache_page(60 * 5), name="list")
+@method_decorator(cache_page(60 * 5), name="retrieve")
 class QuestionViewSet(viewsets.ModelViewSet):
     serializer_class = QuestionSerializer
     permission_classes = [IsAuthenticated]
@@ -91,6 +96,8 @@ class QuestionViewSet(viewsets.ModelViewSet):
         return Question.objects.all()
 
 
+@method_decorator(cache_page(60 * 5), name="list")
+@method_decorator(cache_page(60 * 5), name="retrieve")
 class QuestionOptionViewSet(viewsets.ModelViewSet):
     serializer_class = QuestionOptionSerializer
     permission_classes = [IsAuthenticated]

@@ -67,7 +67,7 @@ class FormSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "visibility",
-            "procces",
+            "process",
             "password",
             "category",
             "created_at",

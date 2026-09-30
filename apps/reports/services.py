@@ -70,8 +70,20 @@ def get_form_report(form):
     return report
 
 
+from dateutil.relativedelta import relativedelta
+from django.utils import timezone
+
+
 def get_report_period_times(period):
     now = timezone.now()
+
+    minute = (now.minute // 5) * 5
+
+    now = now.replace(
+        minute=minute,
+        second=0,
+        microsecond=0,
+    )
 
     if period == "weekly":
         start = now - relativedelta(weeks=1)
@@ -86,15 +98,18 @@ def get_report_period_times(period):
 
 
 def get_period_reporting(start, end):
-
-    forms = Form.objects.filter(create_at__gte=start, create_at__lt=end)
+    forms = Form.objects.filter(
+        created_at__gte=start,
+        created_at__lt=end,
+    )
 
     form_count = forms.count()
 
-    total_view = forms.annotate(total_view=Sum("process__views"))
+    total_view = forms.aggregate(total_view=Sum("process__views"))
 
     total_submissions = Submission.objects.filter(
-        create_at__gte=start, create_at__lt=end
+        created_at__gte=start,
+        created_at__lt=end,
     ).count()
 
     return {
@@ -107,11 +122,10 @@ def get_period_reporting(start, end):
 def get_reporting_realtime_form(form_id):
     total_submissions = Submission.objects.filter(form__id=form_id).count() or 0
     total_view = Process.objects.get(forms__id=form_id).views or 0
-    response_rate = (total_submissions / total_view) * 100
+    # total_view = Form.objects.get(id=form_id).views or 0
     return {
         "total_submissions": total_submissions,
         "total_views": total_view,
-        "response_rate": response_rate,
     }
 
 

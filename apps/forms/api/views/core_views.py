@@ -1,6 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from apps.forms.models import Category, Process
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from ..serializers.core_serializer import (
     CategorySerializer,
     ProcessSerializer,
@@ -12,6 +14,8 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 
 
+@method_decorator(cache_page(60 * 5), name="list")
+@method_decorator(cache_page(60 * 5), name="retrieve")
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]

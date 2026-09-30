@@ -1,4 +1,7 @@
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.core.cache import cache
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
@@ -10,6 +13,7 @@ from apps.reports.services import (
 )
 
 
+@method_decorator(cache_page(60), name="dispatch")
 class UserReportAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
@@ -23,6 +27,7 @@ class UserReportAPIView(APIView):
         return Response(report)
 
 
+@method_decorator(cache_page(60), name="dispatch")
 class ProcessReportAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -60,14 +65,21 @@ class PeriodReportingView(APIView):
     def get(self, request):
         period = request.query_params.get("period")
 
-        if not period == "weekly" and not period == "monthly":
+        if period not in ["weekly", "monthly"]:
             return Response(
                 {"detail": "Invalid period. Allowed values are: weekly, monthly."},
                 status=400,
             )
+
         start, end = get_report_period_times(period)
 
-        data: dict = get_period_reporting(start, end)
+        key = f"period-report:{period}:{start}:{end}"
+
+        data = cache.get(key)
+
+        if data is None:
+            data = get_period_reporting(start, end)
+            cache.set(key, data, timeout=60 * 5)
 
         return Response(
             {

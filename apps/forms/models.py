@@ -20,15 +20,18 @@ class Process(models.Model):
 
     visibility = models.CharField(choices=visibility_choise)
     type = models.CharField(choices=process_type)
-    
 
     password = models.CharField(max_length=128, blank=True, null=True)
-        
+
     category = models.ForeignKey(
-        Category, on_delete=models.CASCADE, related_name="process", blank=True, null=True
+        Category,
+        on_delete=models.CASCADE,
+        related_name="process",
+        blank=True,
+        null=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     def set_password(self, raw_password):
         if raw_password:
             self.password = make_password(raw_password)
@@ -38,7 +41,7 @@ class Process(models.Model):
     def check_password(self, raw_password):
         if not self.password:
             return False
-        
+
         return check_password(raw_password, self.password)
 
 
@@ -47,18 +50,18 @@ class Form(models.Model):
     visibility_choise = [("public", "Public"), ("private", "Private")]
 
     visibility = models.CharField(choices=visibility_choise)
-    procces = models.ForeignKey(Process, on_delete=models.CASCADE, related_name="forms")
+    process = models.ForeignKey(Process, on_delete=models.CASCADE, related_name="forms")
 
     password = models.CharField(max_length=128, blank=True, null=True)
-    
+
     views = models.PositiveIntegerField(default=0)
-    
+
     category = models.ForeignKey(
         Category, on_delete=models.CASCADE, related_name="forms"
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     def set_password(self, raw_password):
         if raw_password:
             self.password = make_password(raw_password)
@@ -74,16 +77,18 @@ class Form(models.Model):
 
 class Question(models.Model):
     QUESTION_TYPE = [
-        ('text','Text'),
-        ('select','Select'),
-        ('number','Number'),
-        ('checkbox','Chehckbox'),
+        ("text", "Text"),
+        ("select", "Select"),
+        ("number", "Number"),
+        ("checkbox", "Chehckbox"),
     ]
 
     text = models.CharField(max_length=150)
     form = models.ForeignKey(Form, on_delete=models.CASCADE, related_name="questions")
     is_required = models.BooleanField(default=False)
-    type = models.CharField(max_length=30,choices=QUESTION_TYPE,default=QUESTION_TYPE[0][0])
+    type = models.CharField(
+        max_length=30, choices=QUESTION_TYPE, default=QUESTION_TYPE[0][0]
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
 
