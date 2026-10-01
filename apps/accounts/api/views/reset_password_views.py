@@ -1,5 +1,6 @@
 from apps.accounts.api.serializers.reset_password_serializers import (
     RequestResetPasswordSerializer,
+    VerifyResetPasswordOTPSerializer,
 )
 from apps.accounts.services import AccountService
 from rest_framework.views import APIView
@@ -7,6 +8,7 @@ from rest_framework.permissions import AllowAny
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
 from rest_framework import status
+from django_redis import get_redis_connection
 
 User = get_user_model()
 
@@ -64,8 +66,7 @@ class ResetPasswordAPIView(APIView):
 
             else:
                 AccountService.delete_registration_data(
-                    f"finder_id:{finder_id}",
-                    f"finder_id:{finder_id}:otp"
+                    f"finder_id:{finder_id}", f"finder_id:{finder_id}:otp"
                 )
 
                 return Response(
@@ -74,3 +75,43 @@ class ResetPasswordAPIView(APIView):
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
+
+class VerifyResetPasswordOTPAPIView(APIView):
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serilizer = VerifyResetPasswordOTPSerializer(data=request.data)
+        serilizer.is_valid(raise_exception=True)
+
+        finder_id = serilizer.validated_data["finder_id"]
+        otp = serilizer.validated_data["otp"]
+
+        is_verified = AccountService.verify_otp(
+            otp=otp,
+            key=f"finder_id:{finder_id}:otp"
+        )
+
+        if not is_verified:
+            return Response(
+                {
+                    'message' : 'your verification failed'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+        redis = get_redis_connection('default')
+        verified_key = f"finder_id:{finder_id}:verified"
+        redis.set(verified_key,1,ex=300)
+
+        return Response(
+            {
+                'message':"otp verify successfully"
+            },
+            status=status.HTTP_200_OK
+        )
+        
+
+
