@@ -1,6 +1,7 @@
 from apps.accounts.api.serializers.reset_password_serializers import (
     RequestResetPasswordSerializer,
     VerifyResetPasswordOTPSerializer,
+    ChangeResetPasswordSerializer,
 )
 from apps.accounts.services import AccountService
 from rest_framework.views import APIView
@@ -89,34 +90,66 @@ class VerifyResetPasswordOTPAPIView(APIView):
         otp = serilizer.validated_data["otp"]
 
         is_verified = AccountService.verify_otp(
-            otp=otp,
-            key=f"finder_id:{finder_id}:otp"
+            otp=otp, key=f"finder_id:{finder_id}:otp"
         )
 
         if not is_verified:
             return Response(
-                {
-                    'message' : 'your verification failed'
-                },
-                status=status.HTTP_400_BAD_REQUEST
+                {"message": "your verification failed"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
-
-        redis = get_redis_connection('default')
+        redis = get_redis_connection("default")
         verified_key = f"finder_id:{finder_id}:verified"
-        redis.set(verified_key,1,ex=300)
+        redis.set(verified_key, 1, ex=300)
 
         return Response(
-            {
-                'message':"otp verify successfully"
-            },
-            status=status.HTTP_200_OK
+            {"message": "otp verify successfully"}, status=status.HTTP_200_OK
         )
-        
+
 
 class ChangeResetPasswordAPIView(APIView):
 
     permission_classes = [AllowAny]
 
-    def post(self,request):
-        pass
+    def post(self, request):
+        serilizer = ChangeResetPasswordSerializer(data=request.data)
+        serilizer.is_valid(raise_exception=True)
+
+        finder_id = serilizer.validated_data["finder_id"]
+
+        redis = get_redis_connection("default")
+
+        verified_key = f"finder_id:{finder_id}:verified"
+
+        is_verified = redis.exists(verified_key)
+
+        if not is_verified:
+            return Response(
+                {"message": "your verification invalid or expired"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        data = AccountService.get_data_in_redis(f"finder_id:{finder_id}")
+
+        email = data[b"email"].decode()
+
+        user = User.objects.filter(email=email).first()
+
+        new_password = serilizer.validated_data["new_password"]
+
+        if not user:
+            return Response(
+                {"message": "user with this email not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        user.set_password(new_password)
+
+        user.save()
+
+        AccountService.delete_registration_data(verified_key, f"finder_id:{finder_id}")
+
+        return Response(
+            {"message": "your password changed successfully"}, status=status.HTTP_200_OK
+        )
