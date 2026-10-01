@@ -6,6 +6,11 @@ from rest_framework_simplejwt.views import (
 from django.urls import path, include
 from .views.google_views import GoogleJWTview
 from .views.auth_views import RegistratoinView, VerifyOtp, RegenerateOtp
+from apps.accounts.api.views.reset_password_views import (
+    ResetPasswordAPIView,
+    VerifyResetPasswordOTPAPIView,
+    ChangeResetPasswordAPIView,
+)
 
 urlpatterns = [
     path("login/", TokenObtainPairView.as_view(), name="login"),
@@ -16,4 +21,7 @@ urlpatterns = [
     path("registration/", RegistratoinView.as_view(), name="registration"),
     path("verify_otp/", VerifyOtp.as_view(), name="verify_otp"),
     path("regenerate_otp/", RegenerateOtp.as_view(), name="regenerate_otp"),
+    path("reset-password/", ResetPasswordAPIView.as_view(),name="reset-password"),
+    path("reset-password/verify/",VerifyResetPasswordOTPAPIView.as_view(),name="reset-password-verify"),
+    path("reset-password/change/",ChangeResetPasswordAPIView.as_view(),name="reset-password-change"),
 ]
