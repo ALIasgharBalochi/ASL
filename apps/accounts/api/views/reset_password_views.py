@@ -114,4 +114,9 @@ class VerifyResetPasswordOTPAPIView(APIView):
         )
         
 
+class ChangeResetPasswordAPIView(APIView):
 
+    permission_classes = [AllowAny]
+
+    def post(self,request):
+        pass
