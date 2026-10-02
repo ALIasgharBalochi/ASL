@@ -29,7 +29,7 @@ class FormViewSet(viewsets.ModelViewSet):
     lookup_url_kwarg = "id"
 
     def get_queryset(self):
-        return Form.objects.filter(procces__user=self.request.user)
+        return Form.objects.filter(process__user=self.request.user)
 
     def get_permissions(self):
 
@@ -38,21 +38,14 @@ class FormViewSet(viewsets.ModelViewSet):
 
         return [IsAuthenticated()]
 
-    
     def retrieve(self, request, *args, **kwargs):
 
         form = self.get_object()
 
         session_id = self.get_linear_session_id(request)
 
-        if not can_access_form(
-            form,
-            user=request.user,
-            session_id=session_id
-        ):
-            raise PermissionDenied(
-                "you must submit the previous from first."
-            )
+        if not can_access_form(form, user=request.user, session_id=session_id):
+            raise PermissionDenied("you must submit the previous from first.")
 
         form.views = F("views") + 1
         form.save(update_fields=["views"])
@@ -76,9 +69,7 @@ class FormViewSet(viewsets.ModelViewSet):
             user=request.user,
             session_id=session_id,
         ):
-            raise PermissionDenied(
-                "You must submit the previous form first."
-            )
+            raise PermissionDenied("You must submit the previous form first.")
 
         serializer = FormPasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -108,17 +99,18 @@ class FormViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
-    def get_linear_session_id(self,request):
+    def get_linear_session_id(self, request):
         if request.user.is_authenticated:
             return None
 
-        session_id = request.session.get('linear_session_id')
+        session_id = request.session.get("linear_session_id")
 
         if not session_id:
             session_id = str(uuid4())
             request.session["linear_session_id"] = session_id
-        
+
         return session_id
+
 
 @method_decorator(cache_page(60 * 5), name="list")
 @method_decorator(cache_page(60 * 5), name="retrieve")
