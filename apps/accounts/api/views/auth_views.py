@@ -78,23 +78,40 @@ class VerifyOtp(APIView):
 
         serializer.is_valid(raise_exception=True)
         registration_id = serializer.validated_data["registration_id"]
-        is_verified = AccountService.verify_otp(
-            serializer.validated_data["otp"],
-            f"registration:{registration_id}:otp",
-        )
+        can_verify = AccountService.can_verify_otp(registration_id)
 
-        if is_verified:
-            data = AccountService.get_data_in_redis(f"registration:{registration_id}")
-            if data:
-                data = {k.decode(): v.decode() for k, v in data.items()}
-                User.objects.create(**data)
-                AccountService.delete_registration_data(
-                    f"registration:{registration_id}",
-                    f"registration:{registration_id}:otp",
+        if can_verify:
+
+            is_verified = AccountService.verify_otp(
+                serializer.validated_data["otp"],
+                f"registration:{registration_id}:otp",
+            )
+
+            if is_verified:
+                data = AccountService.get_data_in_redis(
+                    f"registration:{registration_id}"
                 )
-                return Response({"message": "user create successfully"}, status=200)
+                if data:
+                    data = {k.decode(): v.decode() for k, v in data.items()}
+                    User.objects.create(**data)
+                    AccountService.delete_registration_data(
+                        f"registration:{registration_id}",
+                        f"registration:{registration_id}:otp",
+                    )
+                    AccountService.delete_registration_data(
+                        f"otp:verify:attempts:{registration_id}"
+                    )
+                    return Response(
+                        {"message": "user create success fully"}, status=200
+                    )
+                return Response({"message": "verify failed"}, status=400)
+                # return Response({"message": "user create successfully"}, status=200)
             return Response({"message": "verify failed"}, status=400)
-        return Response({"message": "verify failed"}, status=400)
+        else:
+            return Response(
+                {"message": "Too many attempts. Please try again in 5 minutes."},
+                status=429,
+            )
 
 
 class RegenerateOtp(APIView):
@@ -109,11 +126,11 @@ class RegenerateOtp(APIView):
 
         registratoin_id = serializer.validated_data["registration_id"]
 
-        re_id, otp_code = AccountService.generat_register_otp()
-        if otp_code:
-            AccountService.delete_registration_data(
-                f"registration:{registratoin_id}:otp"
-            )
+        old_otp_code = AccountService.get_data_in_redis(
+            f"registration:{registratoin_id}:otp"
+        )
+        if not old_otp_code:
+            re_id, otp_code = AccountService.generat_register_otp()
             AccountService.set_data_registratoin_to_redis(
                 {"otp": otp_code}, f"registration:{registratoin_id}:otp", 120
             )
@@ -133,16 +150,18 @@ class RegenerateOtp(APIView):
             # )
             if sending_code == 1:
 
-                return Response(
-                    {
-                        "message": "code send successfuly",
-                        "regestratoin_id": registratoin_id,
-                    },
-                    status=200,
-                )
-            else:
-                AccountService.delete_registration_data(
-                    f"registration:{registratoin_id}",
-                    f"registration:{registratoin_id}:otp",
-                )
-                return Response({"message": "send otp faield"}, status=400)
+            #     return Response(
+            #         {
+            #             "message": "code send successfuly",
+            #             "regestratoin_id": registratoin_id,
+            #         },
+            #         status=200,
+            #     )
+            # else:
+            #     AccountService.delete_registration_data(
+            #         f"registration:{registratoin_id}",
+            #         f"registration:{registratoin_id}:otp",
+            #     )
+            #     return Response({"message": "send otp faield"}, status=400)
+        else:
+            return Response({"message": "Your old code is still valid."}, status=400)
