@@ -89,7 +89,7 @@ class VerifyOtp(APIView):
                     f"registration:{registration_id}",
                     f"registration:{registration_id}:otp",
                 )
-                return Response({"message": "user create success fully"}, status=200)
+                return Response({"message": "user create successfully"}, status=200)
             return Response({"message": "verify failed"}, status=400)
         return Response({"message": "verify failed"}, status=400)
 

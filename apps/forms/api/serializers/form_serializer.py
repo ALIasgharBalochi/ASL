@@ -70,6 +70,7 @@ class FormSerializer(serializers.ModelSerializer):
             "process",
             "password",
             "category",
+            "order",
             "created_at",
             "questions",
         ]

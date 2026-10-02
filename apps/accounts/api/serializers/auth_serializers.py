@@ -19,7 +19,7 @@ class VerifyOtpSerialiser(serializers.Serializer):
     def validate_otp(self, value: str):
 
         if not value.isnumeric():
-            raise ValueError("otp shold be number")
+            raise serializers.ValidationError("otp shold be number")
 
         return value
 
