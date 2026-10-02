@@ -61,12 +61,9 @@ class ResetPasswordAPIView(APIView):
                 )
 
             # Send the OTP message to the user and clean up on failure.
-            # code = AccountService.send_email_registratoin(
-            #     otp=otp, email=email, subject="otp for changing password"
-            # )
-            # print(code)
-            code = 1
-            print(otp)
+            code = AccountService.send_email_registratoin(
+                otp=otp, email=email, subject="otp for changing password"
+            )
             if code == 1:
                 return Response(
                     {
