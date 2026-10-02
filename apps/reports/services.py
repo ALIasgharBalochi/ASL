@@ -2,7 +2,7 @@ from django.db.models import Count, Sum, Avg, Min, Max, FloatField, Q
 from django.db.models.functions import Cast
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
-from ..forms.models import Form, Answer, Submission, Process
+from ..forms.models import Form, Answer, Submission
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
