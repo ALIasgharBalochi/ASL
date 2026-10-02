@@ -12,6 +12,7 @@ from apps.reports.services import (
     get_period_reporting,
 )
 
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 @method_decorator(cache_page(60), name="dispatch")
 class UserReportAPIView(APIView):
@@ -58,28 +59,65 @@ class ProcessReportAPIView(APIView):
         )
 
 
-class PeriodReportingView(APIView):
+# class PeriodReportingView(APIView):
 
+#     permission_classes = [IsAdminUser]
+
+#     def get(self, request):
+#         period = request.query_params.get("period")
+
+#         if period not in ["weekly", "monthly"]:
+#             return Response(
+#                 {"detail": "Invalid period. Allowed values are: weekly, monthly."},
+#                 status=400,
+#             )
+
+#         start, end = get_report_period_times(period)
+
+#         key = f"period-report:{period}:{start}:{end}"
+
+#         data = cache.get(key)
+
+#         if data is None:
+#             data = get_period_reporting(start, end)
+#             cache.set(key, data, timeout=60 * 5)
+
+#         return Response(
+#             {
+#                 "period": {
+#                     "type": period,
+#                     "start": start,
+#                     "end": end,
+#                 },
+#                 "summary": data,
+#             }
+#         )
+
+class PeriodReportingView(APIView):
     permission_classes = [IsAdminUser]
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="period",
+                type=str,
+                required=True,
+                description="Report period: weekly or monthly",
+                enum=["weekly", "monthly"],
+            ),
+        ]
+    )
     def get(self, request):
         period = request.query_params.get("period")
 
-        if period not in ["weekly", "monthly"]:
+        if not period == "weekly" and not period == "monthly":
             return Response(
                 {"detail": "Invalid period. Allowed values are: weekly, monthly."},
                 status=400,
             )
 
         start, end = get_report_period_times(period)
-
-        key = f"period-report:{period}:{start}:{end}"
-
-        data = cache.get(key)
-
-        if data is None:
-            data = get_period_reporting(start, end)
-            cache.set(key, data, timeout=60 * 5)
+        data: dict = get_period_reporting(start, end)
 
         return Response(
             {
