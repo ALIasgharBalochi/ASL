@@ -105,7 +105,9 @@ def get_period_reporting(start, end):
 
     form_count = forms.count()
 
-    total_view = forms.aggregate(total_view=Sum("process__views"))
+    total_view = forms.aggregate(
+    total_view=Sum("views")
+)
 
     total_submissions = Submission.objects.filter(
         created_at__gte=start,
