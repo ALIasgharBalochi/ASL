@@ -72,3 +72,15 @@ class AccountService:
         redis = get_redis_connection("default")
         for i in args:
             redis.delete(i)
+
+    @staticmethod
+    def can_verify_otp(registration_id: str) -> bool:
+        redis = get_redis_connection("default")
+        key = f"otp:verify:attempts:{registration_id}"
+
+        attempts = redis.incr(key)
+
+        if attempts == 1:
+            redis.expire(key, 300)
+
+        return attempts <= 5

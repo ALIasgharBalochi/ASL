@@ -29,7 +29,7 @@ class FormViewSet(viewsets.ModelViewSet):
     lookup_url_kwarg = "id"
 
     def get_queryset(self):
-        return Form.objects.all()
+        return Form.objects.filter(procces__user=self.request.user)
 
     def get_permissions(self):
 

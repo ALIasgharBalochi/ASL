@@ -101,24 +101,34 @@ class VerifyResetPasswordOTPAPIView(APIView):
         finder_id = serilizer.validated_data["finder_id"]
         otp = serilizer.validated_data["otp"]
 
-        is_verified = AccountService.verify_otp(
-            otp=otp, key=f"finder_id:{finder_id}:otp"
-        )
+        can_verify = AccountService.can_verify_otp(finder_id)
 
-        if not is_verified:
-            return Response(
-                {"message": "your verification failed"},
-                status=status.HTTP_400_BAD_REQUEST,
+        if can_verify:
+
+            is_verified = AccountService.verify_otp(
+                otp=otp, key=f"finder_id:{finder_id}:otp"
             )
 
-        # Store a verification flag so the final password-change step can confirm the flow.
-        redis = get_redis_connection("default")
-        verified_key = f"finder_id:{finder_id}:verified"
-        redis.set(verified_key, 1, ex=300)
+            if not is_verified:
+                return Response(
+                    {"message": "your verification failed"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
-        return Response(
-            {"message": "otp verify successfully"}, status=status.HTTP_200_OK
-        )
+            # Store a verification flag so the final password-change step can confirm the flow.
+            redis = get_redis_connection("default")
+            verified_key = f"finder_id:{finder_id}:verified"
+            redis.set(verified_key, 1, ex=300)
+
+            AccountService.delete_registration_data(f"otp:verify:attempts:{finder_id}")
+            return Response(
+                {"message": "otp verify successfully"}, status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {"message": "Too many attempts. Please try again in 5 minutes."},
+                status=429,
+            )
 
 
 class ChangeResetPasswordAPIView(APIView):

@@ -1,3 +1,4 @@
+from django.db.migrations import serializer
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from apps.forms.models import Category, Process
@@ -32,6 +33,9 @@ class ProcessViewSet(viewsets.ModelViewSet):
     queryset = Process.objects.all()
     serializer_class = ProcessSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Process.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
