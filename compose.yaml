@@ -16,7 +16,7 @@ services:
     container_name: asl_db
 
     env_file:
-      - .env.docker
+      - .env
 
     environment:
       POSTGRES_DB: ${DB_NAME}
