@@ -102,6 +102,7 @@ class VerifyOtp(APIView):
                         {"message": "user create success fully"}, status=200
                     )
                 return Response({"message": "verify failed"}, status=400)
+                # return Response({"message": "user create successfully"}, status=200)
             return Response({"message": "verify failed"}, status=400)
         else:
             return Response(

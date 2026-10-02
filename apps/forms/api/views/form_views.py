@@ -3,6 +3,9 @@ from rest_framework.response import Response
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
+from uuid import uuid4
+from ...services import can_access_form
+
 from rest_framework import status
 from apps.forms.models import Form, Question, QuestionOption
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -35,10 +38,21 @@ class FormViewSet(viewsets.ModelViewSet):
 
         return [IsAuthenticated()]
 
-    @method_decorator(cache_page(60 * 5))
+    
     def retrieve(self, request, *args, **kwargs):
 
         form = self.get_object()
+
+        session_id = self.get_linear_session_id(request)
+
+        if not can_access_form(
+            form,
+            user=request.user,
+            session_id=session_id
+        ):
+            raise PermissionDenied(
+                "you must submit the previous from first."
+            )
 
         form.views = F("views") + 1
         form.save(update_fields=["views"])
@@ -50,10 +64,21 @@ class FormViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(form)
         return Response(serializer.data)
 
-    @action(detail=True, methods=["GET"], url_path="unlock")
+    @action(detail=True, methods=["POST"], url_path="unlock")
     def unlock(self, request, id=None):
 
         form = self.get_object()
+
+        session_id = self.get_linear_session_id(request)
+
+        if not can_access_form(
+            form,
+            user=request.user,
+            session_id=session_id,
+        ):
+            raise PermissionDenied(
+                "You must submit the previous form first."
+            )
 
         serializer = FormPasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -83,6 +108,17 @@ class FormViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
+    def get_linear_session_id(self,request):
+        if request.user.is_authenticated:
+            return None
+
+        session_id = request.session.get('linear_session_id')
+
+        if not session_id:
+            session_id = str(uuid4())
+            request.session["linear_session_id"] = session_id
+        
+        return session_id
 
 @method_decorator(cache_page(60 * 5), name="list")
 @method_decorator(cache_page(60 * 5), name="retrieve")
