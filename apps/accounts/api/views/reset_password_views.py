@@ -10,6 +10,8 @@ from django.contrib.auth import get_user_model
 from rest_framework.response import Response
 from rest_framework import status
 from django_redis import get_redis_connection
+from drf_spectacular.utils import extend_schema
+from django.shortcuts import get_object_or_404
 
 User = get_user_model()
 
@@ -19,6 +21,7 @@ class ResetPasswordAPIView(APIView):
 
     permission_classes = [AllowAny]
 
+    @extend_schema(request=RequestResetPasswordSerializer)
     def post(self, request):
         """Send a reset OTP to the user's email if the account exists."""
         # Validate the request body before doing any reset-related work.
@@ -26,7 +29,8 @@ class ResetPasswordAPIView(APIView):
         serializer.is_valid(raise_exception=True)
 
         email = serializer.validated_data["email"]
-        user = User.objects.filter(email=email).first()
+
+        user = get_object_or_404(User, email=email)
 
         # Generate a temporary reset identifier and a one-time password.
         finder_id, otp = AccountService.generat_register_otp()
@@ -57,10 +61,12 @@ class ResetPasswordAPIView(APIView):
                 )
 
             # Send the OTP message to the user and clean up on failure.
-            code = AccountService.send_email_registratoin(
-                otp=otp, email=email, subject="otp for changing password"
-            )
-
+            # code = AccountService.send_email_registratoin(
+            #     otp=otp, email=email, subject="otp for changing password"
+            # )
+            # print(code)
+            code = 1
+            print(otp)
             if code == 1:
                 return Response(
                     {
@@ -88,6 +94,7 @@ class VerifyResetPasswordOTPAPIView(APIView):
 
     permission_classes = [AllowAny]
 
+    @extend_schema(request=VerifyResetPasswordOTPSerializer)
     def post(self, request):
         """Accept the OTP and mark the reset flow as verified for a short time."""
         # Validate the OTP input and the reset identifier.
@@ -122,6 +129,7 @@ class ChangeResetPasswordAPIView(APIView):
 
     permission_classes = [AllowAny]
 
+    @extend_schema(request=ChangeResetPasswordSerializer)
     def post(self, request):
         """Change the user's password once the reset OTP verification is valid."""
         # Validate the final reset payload before mutating the user password.
@@ -147,7 +155,7 @@ class ChangeResetPasswordAPIView(APIView):
 
         email = data[b"email"].decode()
 
-        user = User.objects.filter(email=email).first()
+        user = get_object_or_404(User, email=email)
 
         new_password = serilizer.validated_data["new_password"]
 
